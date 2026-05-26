@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>환자기록부 — 李賢 / 지우연</title>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&family=Source+Code+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: 'ChosunNm';
+    src: url('ChosunNm_w400.ttf') format('truetype');
+    font-weight: 400;
+  }
+
+  :root {
+    --bg: #f7f5f0;
+    --paper: #faf9f6;
+    --line: #c8c0b0;
+    --line-light: #e0dbd0;
+    --ink: #2e2b28;
+    --ink-mid: #5a5550;
+    --ink-dim: #9a9088;
+    --red: #8b1a1a;
+    --red-light: #c0392b;
+    --stamp-red: rgba(139,26,26,0.15);
+    --mono: 'ChosunNm', 'Source Code Pro', monospace;
+    --serif: 'ChosunNm', serif;
+    --sans: 'ChosunNm', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: #0a0908;
+    color: var(--ink);
+    font-family: var(--mono);
+    min-height: 100vh;
+    padding: 3rem 2rem;
+    cursor: default;
+  }
+
+  /* ── 전체 문서 래퍼 ── */
+  .document {
+    max-width: 860px;
+    margin: 0 auto;
+    background: var(--paper);
+    box-shadow:
+      0 1px 3px rgba(0,0,0,0.08),
+      0 4px 20px rgba(0,0,0,0.12),
+      inset 0 0 0 1px rgba(0,0,0,0.04);
+    position: relative;
+  }
+
+  @keyframes pageLoad {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 종이 질감 */
+  .document::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 27px,
+        var(--line-light) 27px,
+        var(--line-light) 28px
+      );
+    pointer-events: none;
+    opacity: 0.35;
+    z-index: 0;
+  }
+
+  /* 왼쪽 여백선 */
+  .document::after {
+    content: '';
+    position: absolute;
+    left: 68px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(180,100,100,0.25);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── 병원 헤더 ── */
+  .hospital-header {
+    position: relative;
+    z-index: 2;
+    padding: 2rem 3rem 1.5rem 5rem;
+    border-bottom: 2px solid #3a3630;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: 2rem;
+  }
+
+  .hospital-name {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.4em;
+    color: var(--ink);
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+
+  .hospital-sub {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--ink-dim);
+    letter-spacing: 0.2em;
+  }
+
+  .doc-type {
+    text-align: right;
+  }
+
+  .doc-type-main {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.1em;
+    display: block;
+  }
+
+  .doc-type-sub {
+    font-family: var(--mono);
+    font-size: 0.5rem;
+    color: var(--ink-dim);
+    letter-spacing: 0.3em;
+    display: block;
+    margin-top: 0.2rem;
+  }
+
+  /* ── 섹션 공통 ── */
+  .section {
+    position: relative;
+    z-index: 2;
+    padding: 1.8rem 3rem 1.8rem 5rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .section-title {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* ── 기본 정보 그리드 ── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+  }
+
+  .field {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--line-light);
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+    min-height: 2rem;
+  }
+  .field:nth-child(odd) { padding-right: 2rem; }
+  .field:nth-child(even) { padding-left: 2rem; border-left: 1px solid var(--line-light); }
+
+  .field-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--ink-dim);
+    letter-spacing: 0.15em;
+    min-width: 90px;
+    flex-shrink: 0;
+  }
+
+  .field-value {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    color: var(--ink);
+    border-bottom: 1px solid var(--line);
+    flex: 1;
+    padding-bottom: 1px;
+    letter-spacing: 0.05em;
+  }
+
+  .field-value.large {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 700;
+    border-bottom: none;
+  }
+
+  .field-value.handwrite {
+    font-family: var(--serif);
+    font-size: 0.85rem;
+    color: var(--ink-mid);
+    font-style: italic;
+  }
+
+  /* ── 환자 ID 박스 ── */
+  .patient-id-bar {
+    position: relative;
+    z-index: 2;
+    padding: 1rem 3rem 1rem 5rem;
+    background: var(--ink);
+    color: var(--paper);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+  }
+
+  .patient-id {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.4em;
+  }
+
+  .barcode {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    height: 24px;
+  }
+  .barcode span {
+    display: block;
+    width: 2px;
+    background: var(--paper);
+    height: 100%;
+    opacity: 0.8;
+  }
+  .barcode span:nth-child(3n) { width: 1px; opacity: 0.4; }
+  .barcode span:nth-child(5n) { width: 3px; }
+
+  /* ── 본문 텍스트 ── */
+  .clinical-text {
+    font-family: 'ChosunNm', serif;
+    font-size: 0.88rem;
+    line-height: 2.2;
+    color: var(--ink-mid);
+    font-weight: 300;
+  }
+
+  .clinical-text p {
+    margin-bottom: 1.2rem;
+    text-indent: 0;
+  }
+
+  .clinical-text .inline-em {
+    font-weight: 600;
+    color: var(--ink);
+    font-style: normal;
+  }
+
+  /* 인용 박스 */
+  .obs-box {
+    margin: 1.5rem 0;
+    padding: 0.8rem 0;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    background: none;
+    position: relative;
+  }
+
+  .obs-label {
+    display: block;
+    font-size: 0.45rem;
+    letter-spacing: 0.3em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .obs-text {
+    font-family: 'ChosunNm', serif;
+    font-size: 0.82rem;
+    font-style: italic;
+    color: var(--ink-mid);
+    line-height: 2;
+  }
+
+  /* ── 특징 체크리스트 ── */
+  .checklist {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem 3rem;
+  }
+
+  .checklist li {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--ink-mid);
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid var(--line-light);
+  }
+
+  .check-box {
+    width: 9px;
+    height: 9px;
+    border: 1px solid var(--ink-mid);
+    flex-shrink: 0;
+    position: relative;
+    top: 1px;
+  }
+  .check-box.checked::after {
+    content: '✓';
+    position: absolute;
+    top: -4px;
+    left: 0px;
+    font-size: 10px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .check-note {
+    font-size: 0.55rem;
+    color: var(--ink-dim);
+    margin-left: auto;
+    font-style: italic;
+  }
+
+  /* ── 진단 코드 ── */
+  .diagnosis-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+
+  .diag-code {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    border: 1px solid var(--ink-mid);
+    padding: 0.2rem 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--ink-mid);
+  }
+
+  .diag-code.primary {
+    border-color: var(--ink);
+    color: var(--ink);
+    font-weight: 600;
+    background: rgba(0,0,0,0.03);
+  }
+
+  /* ── 기밀 스탬프 / 비밀 섹션 ── */
+  .classified-trigger {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding: 1.5rem 3rem 1.5rem 5rem;
+    background: none;
+    border: none;
+    border-top: 2px solid #3a3630;
+    border-bottom: 2px solid #3a3630;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--mono);
+    color: var(--ink);
+    transition: background 0.2s ease;
+  }
+  .classified-trigger:hover { background: rgba(0,0,0,0.02); }
+
+  .classified-label {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .stamp {
+    font-family: var(--serif);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--red);
+    border: 2px solid var(--red);
+    padding: 0.2rem 0.8rem;
+    letter-spacing: 0.2em;
+    transform: rotate(-2deg);
+    display: inline-block;
+    opacity: 0.8;
+  }
+
+  .classified-text {
+    font-size: 0.78rem;
+    letter-spacing: 0.4em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+  }
+
+  .classified-icon {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--ink-dim);
+    transition: transform 0.3s ease;
+  }
+  .classified-trigger.open .classified-icon {
+    transform: rotate(180deg);
+  }
+
+  /* 비밀 내용 */
+  .classified-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 1.5s ease;
+    position: relative;
+    z-index: 2;
+  }
+  .classified-content.open { max-height: 8000px; }
+
+  /* 기밀 열릴 때 배경 글리치 오버레이 */
+  #glitch-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 8000;
+    pointer-events: none;
+    opacity: 0;
+    background: #000;
+  }
+  #glitch-overlay.active {
+    animation: glitchOverlay 1.2s steps(1) forwards;
+  }
+  @keyframes glitchOverlay {
+    0%   { opacity: 0; }
+    8%   { opacity: 0.85; background: #000; }
+    14%  { opacity: 0.3; background: #0a0000; }
+    20%  { opacity: 0.9; background: #000; }
+    28%  { opacity: 0.1; }
+    34%  { opacity: 0.95; background: #000; filter: hue-rotate(180deg); }
+    42%  { opacity: 0.4; }
+    50%  { opacity: 0.8; background: #000; }
+    60%  { opacity: 0.2; }
+    70%  { opacity: 0.6; }
+    80%  { opacity: 0.15; }
+    90%  { opacity: 0.05; }
+    100% { opacity: 0; }
+  }
+
+  /* 기밀 내용 배경 — 열리면 검정 */
+  .classified-inner {
+    padding: 2rem 3rem 2rem 5rem;
+    border-bottom: 1px solid var(--line);
+    background: rgba(139,26,26,0.015);
+    transition: background 0.5s ease 0.8s, color 0.5s ease 0.8s;
+  }
+  .classified-content.open .classified-inner {
+    background: #0d0d0d;
+  }
+  .classified-content.open .classified-inner .clinical-text {
+    color: #7a7068;
+  }
+  .classified-content.open .classified-inner .inline-em {
+    color: #a89880;
+  }
+  .classified-content.open .classified-inner .section-title {
+    color: #5a5048;
+  }
+  .classified-content.open .classified-inner .relation-header {
+    color: #5a5048;
+  }
+  .classified-content.open .classified-inner .relation-divider {
+    border-color: #2a2520;
+  }
+  .classified-content.open .classified-inner .classified-watermark {
+    color: rgba(139,26,26,0.08);
+  }
+  .classified-content.open .flip-hint {
+    color: #3a3028;
+  }
+  .classified-content.open .stat-table td {
+    border-color: #2a2520;
+    color: #7a7068;
+    background: transparent;
+  }
+  .classified-content.open .stat-table td:first-child {
+    background: rgba(255,255,255,0.02);
+  }
+  .classified-content.open .stat-bar-wrap {
+    background: #2a2520;
+  }
+  .classified-content.open .stat-bar-fill {
+    background: #5a4030;
+  }
+  .classified-content.open .skill-entry {
+    border-color: #2a2520;
+  }
+  .classified-content.open .skill-name,
+  .classified-content.open .skill-desc {
+    color: #5a5048;
+  }
+  .classified-content.open .infected-title {
+    color: #6b2020;
+  }
+
+  .classified-watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-35deg);
+    font-family: var(--serif);
+    font-size: 9rem;
+    font-weight: 700;
+    color: var(--stamp-red);
+    letter-spacing: 0.3em;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 0;
+    user-select: none;
+  }
+
+  .classified-inner > * { position: relative; z-index: 1; }
+
+  .relation-divider {
+    margin: 2rem 0;
+    border: none;
+    border-top: 1px dashed var(--line);
+  }
+
+  .relation-header {
+    font-family: var(--mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.4em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+
+  /* ── 키워드 글리치 (빨간색) ── */
+  .kw-glitch {
+    color: var(--red);
+    font-weight: 700;
+    position: relative;
+    display: inline-block;
+    animation: kwGlitch 4s infinite;
+  }
+  @keyframes kwGlitch {
+    0%, 90%, 100% { text-shadow: none; transform: none; }
+    92% { text-shadow: 2px 0 #f00, -2px 0 #0ff; transform: translateX(2px); }
+    94% { text-shadow: -2px 0 #f00, 2px 0 #0ff; transform: translateX(-2px); }
+    96% { text-shadow: 2px 0 #f00, -2px 0 #0ff; transform: translateX(1px); }
+    98% { text-shadow: none; transform: none; }
+  }
+
+  /* ── 10. 좌우 글리치 강화 ── */
+  #glitch-overlay.active {
+    animation: glitchOverlay 1.4s steps(1) forwards;
+  }
+  @keyframes glitchOverlay {
+    0%   { opacity:0; clip-path: inset(0 100% 0 0); }
+    6%   { opacity:0.9; clip-path: inset(20% 0 30% 0); background:#000; }
+    10%  { opacity:0.3; clip-path: inset(0 0 0 40%); }
+    14%  { opacity:0.95; clip-path: inset(40% 0 0 0); background:#0a0000; }
+    18%  { opacity:0.2; clip-path: inset(0 30% 0 0); }
+    24%  { opacity:0.9; clip-path: inset(0 0 60% 0); }
+    30%  { opacity:0.4; clip-path: inset(0 0 0 0); }
+    36%  { opacity:0.85; clip-path: inset(10% 0 10% 0); }
+    44%  { opacity:0.15; }
+    52%  { opacity:0.7; clip-path: inset(0 20% 0 20%); }
+    62%  { opacity:0.2; }
+    74%  { opacity:0.4; }
+    85%  { opacity:0.08; }
+    100% { opacity:0; }
+  }
+
+  /* ── 12. 비밀설정 중요 키워드 볼드 ── */
+  .secret-bold {
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .classified-content.open .secret-bold {
+    color: #c8b89a;
+  }
+  .flip-hint {
+    font-size: 0.5rem;
+    color: var(--ink-dim);
+    letter-spacing: 0.3em;
+    text-align: right;
+    margin-bottom: 1.5rem;
+  }
+
+  .flip-card {
+    width: 100%;
+    cursor: pointer;
+    perspective: 1200px;
+  }
+
+  .flip-card-inner {
+    position: relative;
+    width: 100%;
+    transition: transform 0.7s ease;
+    transform-style: preserve-3d;
+  }
+
+  .flip-card.flipped .flip-card-inner {
+    transform: rotateY(180deg);
+  }
+
+  .flip-front, .flip-back {
+    width: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .flip-back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotateY(180deg);
+    background: rgba(139,26,26,0.03);
+    padding-top: 0.5rem;
+  }
+
+  /* ── 감염체 섹션 (기존 standalone 제거됨) ── */
+  .infected-section {
+    position: relative;
+    z-index: 2;
+    padding: 1.8rem 3rem 1.8rem 5rem;
+    border-bottom: 1px solid var(--line);
+    background: rgba(0,0,0,0.01);
+  }
+
+  .infected-title {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.5em;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .infected-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--red);
+    opacity: 0.3;
+  }
+
+  .stat-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+  }
+  .stat-table td {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  .stat-table td:first-child {
+    color: var(--ink-dim);
+    letter-spacing: 0.2em;
+    font-size: 0.52rem;
+    width: 80px;
+    background: rgba(0,0,0,0.02);
+  }
+  .stat-table td:nth-child(2) {
+    color: var(--ink);
+    font-weight: 600;
+    width: 40px;
+    text-align: center;
+  }
+  .stat-bar-cell { padding: 0.4rem 0.8rem; }
+  .stat-bar-wrap {
+    height: 3px;
+    background: var(--line-light);
+    width: 160px;
+    position: relative;
+  }
+  .stat-bar-fill {
+    position: absolute;
+    left: 0; top: 0; height: 100%;
+    background: var(--ink-mid);
+    width: 0;
+    transition: width 1.2s ease;
+  }
+
+  .skill-entry {
+    margin-top: 1rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--line);
+    font-family: var(--mono);
+  }
+  .skill-name {
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: var(--ink-dim);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+  .skill-desc {
+    font-size: 0.65rem;
+    color: var(--ink-mid);
+    line-height: 1.9;
+    font-weight: 300;
+  }
+
+  /* ── 서명란 ── */
+  .signature-section {
+    position: relative;
+    z-index: 2;
+    padding: 1.5rem 3rem 1.5rem 5rem;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 2rem;
+  }
+
+  .sig-field {
+    flex: 1;
+    text-align: center;
+  }
+  .sig-line {
+    border-bottom: 1px solid #3a3630;
+    height: 2rem;
+    margin-bottom: 0.3rem;
+    position: relative;
+  }
+  .sig-label {
+    font-family: var(--mono);
+    font-size: 0.45rem;
+    color: var(--ink-dim);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+
+  /* 오너 정보 서명 */
+  .sig-owner {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--ink-mid);
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  /* ── 푸터 ── */
+  .doc-footer {
+    position: relative;
+    z-index: 2;
+    padding: 0.8rem 3rem 0.8rem 5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-code {
+    font-family: var(--mono);
+    font-size: 0.45rem;
+    color: var(--line);
+    letter-spacing: 0.3em;
+  }
+
+  .page-num {
+    font-family: var(--mono);
+    font-size: 0.45rem;
+    color: var(--line);
+    letter-spacing: 0.2em;
+  }
+
+  /* ── 페이지 번호 왼쪽 숫자 ── */
+  .line-numbers {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 55px;
+    padding-top: 2px;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  /* ── 3. 임상관찰 불규칙 글리치 글자 ── */
+  .cg {
+    display: inline;
+    animation: cgAnim var(--d, 6s) var(--delay, 0s) infinite;
+  }
+  @keyframes cgAnim {
+    0%, 88%, 100% { text-shadow: none; opacity: 1; transform: none; }
+    90% { text-shadow: 1px 0 #f00, -1px 0 #0ff; transform: translateX(1px); opacity: 0.8; }
+    92% { text-shadow: -2px 0 #f00, 2px 0 #0ff; transform: translateX(-1px); }
+    94% { text-shadow: 1px 0 #f00, -1px 0 #0ff; opacity: 0.6; }
+    96% { text-shadow: none; opacity: 1; transform: none; }
+  }
+
+  /* ── 8. 감염체 제목 지직 ── */
+  .infected-title { animation: infTitleGlitch 3s infinite; font-size: 1.1rem !important; }
+  @keyframes infTitleGlitch {
+    0%, 80%, 100% { text-shadow: none; transform: none; }
+    82% { text-shadow: 3px 0 #f00, -3px 0 #0ff; transform: translateX(2px); }
+    84% { text-shadow: -3px 0 #f00, 3px 0 #0ff; transform: translateX(-2px); }
+    86% { text-shadow: 2px 0 #f00, -2px 0 #0ff; transform: skewX(3deg); }
+    88% { text-shadow: none; transform: none; }
+  }
+
+  /* ── 10. 감염체 본문 글리치 ── */
+  .inf-glitch { animation: infGlitch 5s infinite; }
+  @keyframes infGlitch {
+    0%, 85%, 100% { text-shadow: none; }
+    87% { text-shadow: 2px 0 rgba(0,0,0,0.5), -2px 0 #0ff; opacity: 0.7; transform: translateX(2px); }
+    89% { text-shadow: -2px 0 rgba(0,0,0,0.5), 2px 0 #0ff; transform: translateX(-1px); }
+    91% { text-shadow: none; opacity: 1; transform: none; }
+  }
+  .inf-glitch-red {
+    color: #8b1a1a;
+    font-weight: 600;
+    animation: infGlitchRed 4s infinite;
+  }
+  @keyframes infGlitchRed {
+    0%, 82%, 100% { text-shadow: none; }
+    84% { text-shadow: 2px 0 #f00, -2px 0 #ff6060; transform: translateX(2px); opacity: 0.8; }
+    86% { text-shadow: -3px 0 #f00, 3px 0 #ff0000; transform: translateX(-2px); }
+    90% { text-shadow: none; transform: none; opacity: 1; }
+  }
+
+  /* ── 6. 카드 플립 힌트 ── */
+  .flip-hint {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-bottom: 2rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--ink-dim);
+    border: none !important;
+    padding: 0 !important;
+    animation: hintPulse 2.5s ease infinite;
+  }
+  .flip-hint::before, .flip-hint::after {
+    content: '';
+    height: 1px;
+    width: 30px;
+    background: currentColor;
+    opacity: 0.4;
+    display: block;
+  }
+  @keyframes hintPulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+  .classified-content.open .flip-hint { color: #5a5048; }
+
+  /* ── 2. 모바일 대응 ── */
+  @media (max-width: 700px) {
+    body { padding: 0; }
+    .hospital-header,
+    .section,
+    .classified-trigger,
+    .classified-inner,
+    .infected-section,
+    .doc-footer { padding-left: 1.2rem; padding-right: 1.2rem; }
+    .document::after { display: none; }
+    .info-grid { grid-template-columns: 1fr; }
+    .field:nth-child(even) { padding-left: 0; border-left: none; }
+    .checklist { grid-template-columns: 1fr; }
+    .diagnosis-row { flex-direction: column; gap: 0.5rem; }
+    .hospital-header { grid-template-columns: 1fr; }
+    .doc-type { text-align: left; margin-top: 0.5rem; }
+    .section-title { font-size: 0.6rem !important; }
+    .field-label { min-width: 70px; }
+    .clinical-text { font-size: 0.8rem; }
+    .flip-card-inner { transition: transform 0.5s ease; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── 인트로 로딩 ── -->
+<div id="intro">
+  <div id="intro-text"></div>
+  <div id="intro-hint">터치하여 스킵</div>
+</div>
+
+<style>
+  #intro {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  #intro.hidden {
+    pointer-events: none;
+    animation: introFade 0.8s ease forwards;
+  }
+  @keyframes introFade {
+    to { opacity: 0; visibility: hidden; }
+  }
+
+  #intro-text {
+    font-family: 'Source Code Pro', monospace;
+    color: #fff;
+    text-align: center;
+    line-height: 2.2;
+    max-width: 600px;
+    padding: 0 2rem;
+    min-height: 3.5em;
+    white-space: pre-wrap;
+    position: relative;
+  }
+
+  /* 글리치 효과 — 중간 줄용 (사라짐) */
+  #intro-text.glitch-out {
+    animation: glitchOut 0.4s steps(1);
+  }
+  @keyframes glitchOut {
+    0%   { text-shadow: 2px 0 #f00, -2px 0 #0ff; opacity: 1; transform: skewX(0); }
+    20%  { text-shadow: -3px 0 #f00, 3px 0 #0ff; opacity: 0.7; transform: skewX(4deg); }
+    40%  { text-shadow: 3px 0 #f00, -3px 0 #0ff; opacity: 1; transform: skewX(-2deg); }
+    60%  { text-shadow: -2px 0 #f00, 2px 0 #0ff; opacity: 0.4; transform: translateX(4px); }
+    80%  { text-shadow: 2px 0 #f00, -2px 0 #0ff; opacity: 0.1; }
+    100% { opacity: 1; text-shadow: none; transform: none; }
+  }
+
+
+
+  #intro-hint {
+    position: absolute;
+    bottom: 3rem;
+    font-family: 'Source Code Pro', monospace;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    animation: hintBlink 2s ease infinite;
+  }
+  @keyframes hintBlink {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 0.6; }
+  }
+
+  /* 커서 깜빡임 */
+  #intro-text::after {
+    content: '▋';
+    animation: cursorBlink 0.8s step-end infinite;
+    color: rgba(255,255,255,0.6);
+    font-size: 0.9em;
+  }
+  #intro-text.no-cursor::after { display: none; }
+</style>
+
+<div id="glitch-overlay"></div>
+<div class="document" id="main-document">
+
+  <!-- 병원 헤더 -->
+  <div class="hospital-header">
+    <div>
+      <div class="hospital-name">Shelter Entry Verification</div>
+      <div class="hospital-sub">쉘터 출입 확인서</div>
+    </div>
+    <div class="doc-type">
+      <span class="doc-type-main">출 입 확 인 서</span>
+      <span class="doc-type-sub"></span>
+    </div>
+  </div>
+
+
+
+  <!-- 기본 정보 -->
+  <div class="section">
+    <div class="section-title">기본 인적사항 · </div>
+    <div class="info-grid">
+      <div class="field">
+        <div class="field-label">성명</div>
+        <div class="field-value large">지우연(智虞延)</div>
+      </div>
+      <div class="field">
+        <div class="field-label">별칭</div>
+        <div class="field-value large" style="font-size:1rem;">이현 (李賢)</div>
+      </div>
+      <div class="field">
+        <div class="field-label">연령</div>
+        <div class="field-value">22세</div>
+      </div>
+      <div class="field">
+        <div class="field-label">생년월일</div>
+        <div class="field-value">____.04.28</div>
+      </div>
+      <div class="field">
+        <div class="field-label">혈액형</div>
+        <div class="field-value">AB형</div>
+      </div>
+      <div class="field">
+        <div class="field-label">성별</div>
+        <div class="field-value">XY</div>
+      </div>
+      <div class="field">
+        <div class="field-label">신장 / 체중</div>
+        <div class="field-value">178 cm &nbsp;/&nbsp; 58 kg</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 진단 코드 -->
+  <div class="section">
+    <div class="section-title">진단 분류 · </div>
+    <div class="diagnosis-row">
+      <span class="diag-code primary">F60.7 — 의존성 인격장애 (존재증명을 바람)</span>
+      <span class="diag-code">F32.2 — 중형 우울증</span>
+      <span class="diag-code">Z72.8 — 자해 행동 (피어싱)</span>
+      <span class="diag-code">F40.1 — 사회 공포증 (공황장해)</span>
+    </div>
+    <div style="margin-top:1rem;">
+      <div class="field-label" style="font-size:0.8rem;margin-bottom:0.8rem;color:var(--ink);">임상소견 성격</div>
+      <div class="clinical-text" style="font-size:0.82rem;line-height:2;color:var(--ink-mid);">
+        매우 <span class="kw-glitch" data-text="우울">우울</span>하며, <span class="kw-glitch" data-text="존재 증명">존재 증명</span>적이다. 또한 모든것에 <span class="kw-glitch" data-text="결핍">결핍</span>적인 성격을 가지고 있다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 임상 관찰 기록 -->
+  <div class="section">
+    <div class="section-title">임상 관찰 기록 · </div>
+
+    <div class="obs-box">
+      <div class="obs-label"></div>
+      <div class="obs-text">
+        "살아 있다는 건 증명해야 하는 거 아닐까요.<br>
+        그렇지 않으면, 그건 그냥 아직 안 죽은 것에 불과하잖아."
+      </div>
+    </div>
+
+    <div class="clinical-text">
+      <p>본 환자는 멸망 이후의 세계 속에서도 끝내 <span class="inline-em">타인의 숨을 붙들어 <span class="cg" style="--d:7s;--delay:0.3s">매며</span></span> 살아간다. 끊어진 살갗을 <span class="cg" style="--d:5s;--delay:1.2s">기우고</span>, 무너진 육신을 억지로 봉합하면서도 정작 자신이 왜 살아 있는지에 대해서는 오래도록 답하지 못한 채 살아가는 것으로 관찰된다.</p>
+
+      <p>손끝은 늘 <span class="cg" style="--d:8s;--delay:0.7s">다정하나</span>, 그 다정함에는 목적을 잃은 집착과도 같은 기색이 묻어난다. 타인의 생존 위에 자신의 존재 이유를 <span class="cg" style="--d:6s;--delay:2s">덧쌓는</span> 패턴이 반복적으로 확인됨. 이미 끝났어야 했을 생명조차 조용히 주워 담아 이어 붙이려 하며, 이것이 <span class="cg" style="--d:9s;--delay:0.5s">구원</span>인지 자기만족인지 환자 본인도 명확히 인식하지 못하는 상태로 판단된다.</p>
+
+      <p>감정 표출 빈도 <span class="cg" style="--d:5s;--delay:1.8s">낮음</span>. 담담한 표정이 주를 이루며 비극적 상황 앞에서도 과장된 반응 없음. 그러나 <span class="inline-em">사람을 <span class="cg" style="--d:7s;--delay:3s">포기</span>하는 행위에는 극도의 저항</span>을 보임.</p>
+    </div>
+
+    <div class="obs-box" style="margin-top:1.5rem;">
+      <div class="obs-label"></div>
+      <div class="obs-text">
+        — 이상하지. 사람 하나 살리는 일보다, 살아도 된다는 걸 믿는 일이 훨씬 어렵다니.
+      </div>
+    </div>
+
+    <div class="clinical-text" style="margin-top:1.2rem;">
+      <p>가끔 의미를 지나치게 오래 <span class="cg" style="--d:8s;--delay:0.9s">생각하는</span> 경향 확인됨. 「인간은 왜 살아야 하는가」 「존재는 증명되어야 하는가」 「살아남았다는 사실과 살아 있다는 사실은 동일한가」 등. 그러나 이를 외부에 설명하지 않으려는 <span class="cg" style="--d:6s;--delay:2.5s">태도</span>가 강함. <span class="inline-em">설명되는 순간 감정은 이미 다른 것이 된다</span>고 진술함.</p>
+      <p>그는 이유 없이 살아갈 수 있는 인간을 <span class="cg" style="--d:7s;--delay:1.5s">이해하지</span> 못한다. 그것이 동경인지 두려움인지는 본인도 <span class="cg" style="--d:9s;--delay:0.2s">판별하지</span> 못한 채임.</p>
+    </div>
+  </div>
+
+  <!-- 특이사항 -->
+  <div class="section">
+    <div class="section-title">특이사항 · 특징</div>
+    <ul class="checklist">
+      <li>
+        <div class="check-box checked"></div>
+        피어싱 다수
+        <span class="check-note">자해 수단</span>
+      </li>
+      <li>
+        <div class="check-box checked"></div>
+        야매 의사 (무면허)
+        <span class="check-note">미등록</span>
+      </li>
+      <li>
+        <div class="check-box checked"></div>
+        새로운 극본 상상 반복
+        <span class="check-note">미완결 시 중단</span>
+      </li>
+      <li>
+        <div class="check-box checked"></div>
+        가곡 애호 / 깨진 CD 수집
+        <span class="check-note">강박적 수집</span>
+      </li>
+      <li>
+        <div class="check-box checked"></div>
+        지독한 기독교 신앙
+        <span class="check-note">성경 상시 소지</span>
+      </li>
+      <li>
+        <div class="check-box checked"></div>
+        과도 소지
+        <span class="check-note">소지품</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 기밀 섹션 -->
+  <button class="classified-trigger" id="classBtn">
+    <div class="classified-label">
+      <span class="stamp">기 밀</span>
+      <span class="classified-text">Secret Profile — 지우연(智虞延) · 관계자 외 열람 금지</span>
+    </div>
+    <span class="classified-icon">▼</span>
+  </button>
+
+  <div class="classified-content" id="classContent">
+    <div class="classified-inner">
+      <div class="classified-watermark">기밀</div>
+
+      <!-- 카드 플립 힌트 -->
+      <div class="flip-hint">
+        <span class="flip-hint-icon">↺</span>
+        카드를 클릭하면 뒤집힙니다
+        <span class="flip-hint-icon" style="transform:scaleX(-1); display:inline-block;">↺</span>
+      </div>
+
+      <!-- 카드 플립 -->
+      <div class="flip-card" id="flipCard">
+        <div class="flip-card-inner">
+
+          <!-- 앞면: 비밀 설정 -->
+          <div class="flip-front">
+            <div style="font-size:1.1rem;font-weight:700;letter-spacing:0.2em;margin-bottom:1.5rem;color:var(--ink-dim);">비밀 설정 · Classified Background</div>
+            <div class="clinical-text">
+              <p>본명: <span class="inline-em">지우연(智虞延)</span>. 지워지지 못하였으며, 끝내 <span class="secret-bold">지워지기를 거부한 채 잔존해 왔다</span>는 사실만이 어쩌면 그를 가장 온전히 설명하는 문장일 것이다.</p>
+              <p>그는 <span class="secret-bold">우연(偶然)히 태어난 인간</span>이었으므로 애초부터 살아야 할 거창한 연유가 존재하지 않았다. 지우연은 멸망 이후의 세계에서 사람들 사이 어딘가에 끼어 그 <span class="cg" style="--d:8s;--delay:1s">우연성</span>을 악착같이 증명하던 이었다. 그러나 그 <span class="cg" style="--d:6s;--delay:2s">'끼어 있음'</span>이 실존을 의미하는가에 대해서는, 그 자신조차 오래 의문을 품고 있었다.</p>
+              <p>전환점: <span class="secret-bold">이도가 건네준 초콜릿</span>. 달다는 감각은 이상할 만큼 사랑에 빠지게 하는 종류의 것이었다. 혀 위에서 <span class="cg" style="--d:7s;--delay:0.5s">녹아내리는</span> 당분은 굶주림만이 아니라 오래전에 마모된 감각들까지 억지로 끌어올렸다. 체온, 유년, 보호받던 기억의 잔향.</p>
+              <p>지나치게 달콤한 것은 때때로 구원보다 잔혹하다. 이미 폐허가 되어버린 인간에게 다시금 <span class="cg" style="--d:9s;--delay:1.5s">결핍</span>을 자각하게 만들기 때문이다. 한 입 크기의 사소한 당류가 인간을 삶에 <span class="cg" style="--d:5s;--delay:3s">유착</span>시킬 수도 있다는 사실을 그는 그날 처음 이해하였다.</p>
+              <p>이도는 이유를 요구하지 않았다. 쓸모를 입증하지 않아도 먹을 것을 나누었고, 살아 있음 자체를 문제 삼지 않았다. 지우연은 그것을 끝내 <span class="cg" style="--d:7s;--delay:0.8s">이해하지</span> 못했다. 이해할 수 없다는 감정이 동경인지 공포인지조차 끝내 판별하지 못하였다.</p>
+              <p>그래, 그 역시 알고 있었을 것이다. 자신은 <span class="secret-bold">영원히 프로메테우스가 될 수 없다</span>는 사실을. 신성을 흉내 내는 법만 익혔을 뿐, 신의 위치에 도달한 적은 단 한 번도 없었다. 그럼에도 그는 <span class="cg" style="--d:6s;--delay:2.2s">매일</span> 같은 바위 앞에 선다. 이도의 얼굴은 끝내 언어화되지 못한 문장들 틈에서 <span class="cg" style="--d:8s;--delay:1.1s">유령처럼</span> 부유하고 있었다.</p>
+            </div>
+            <hr class="relation-divider">
+            <div style="font-size:0.9rem;font-weight:700;letter-spacing:0.3em;margin-bottom:1.2rem;color:var(--ink-dim);">비밀 선관 · Secret Relation — 이도(李道)</div>
+            <div class="clinical-text">
+              <p>그는 이도를 이해하지 못한다. 아니, 평생이 가도 <span class="cg" style="--d:7s;--delay:0.3s">이해할 수 없을</span> 것이다. 이해할 수 없었기에 언제나, 오래도록 바라보게 되었다. 이도는 언제나 자신이 묻는 것에 대한 이유를 묻지 않았고, 존재를 계산하며 치열하게 살지 않았다. 마치 살아 있다는 사실만으로 이미 충분하다는 듯 사람을 받아들였다. 그저 쿠키를 만들고, <span class="cg" style="--d:5s;--delay:1.7s">초콜릿을 녹이며</span>. 지우연은 그 태도를 끝내 납득하지 못했다.</p>
+              <p>그렇기에 지우연은 이도를 동경한다. 그러나 단 한 번도 닮고 싶다고 입 밖에 낸 적 없다. 그런 문장을 말하게 된다면 자신이 결코 그와 같은 인간이 될 수 없음을 인정하게 될 것 같았으므로.</p>
+              <p>이도는 이유 없이 살아가는 인간이었다. 반면 지우연은 살아가기 위해 끊임없이 이유를 제조해야만 하는 인간이었다. 다만 아주 드물게 — 봉합을 끝낸 뒤 손끝에 남은 피 냄새 사이에서 그는 떠올린다. 그날 혀끝에 남았던 <span class="cg" style="--d:6s;--delay:2.8s">초콜릿의 단맛</span>을. 그리고 자신이 아직도 그 순간으로부터 <span class="cg" style="--d:8s;--delay:0.6s">완전히 벗어나지 못했다</span>는 사실을.</p>
+            </div>
+          </div>
+
+          <!-- 뒷면: 감염체 기록 -->
+          <div class="flip-back">
+            <div class="infected-title" style="margin-bottom:1.5rem;">감염체 기록 · Infected Form Record</div>
+            <div class="clinical-text" style="margin-bottom:1.2rem;">
+              <p>동공은 완전히 검게 침식되어 흰자와의 경계조차 흐릿하게 번지게 된다. 피부 위로는 가느다란 검은 혈관들이 실금처럼 드러나 있으며, <span class="inf-glitch">목덜미와 손등, 쇄골 부근으로 갈수록 점차 짙고 거칠게 퍼지는 것처럼 보인다.</span> 감염이 진행된 이후에도 그는 기묘할 만큼 인간의 형태를 유지하고 있다. 다만 자세히 바라보면 실과 실들로 봉합된 자국들이 지나치게 많다. 피부 위에는 오래된 실밥 흔적과 억지로 이어붙인 듯한 상처가 남아 있으며, 움직일 때마다 마치 찢어진 육체를 간신히 붙들고 있는 것처럼 <span class="inf-glitch-red">미세하게 살점들이 튀어 나온다.</span></p>
+              <p>또 특징적인 점은 손끝의 변화가 두드러진다. 손가락 끝마디는 검게 괴사된 듯 변색되어 있으며, 손톱은 부러진 뼈처럼 길고 불규칙하게 자라나 있다. 그러나 그는 그것조차 숨기려는 듯 늘 장갑이나 붕대로 감싸고 다닌다. <span class="inf-glitch">흥분하거나 공격성을 드러낼 경우 검은 혈관은 심장 박동을 따라 맥동하듯 꿈틀거리며,</span> 입가와 눈가에 먹물 같은 체액이 얇게 번져 나온다. 그 순간만큼은 억눌러 두었던 감염이 인간의 외피를 비집고 나오려는 것처럼 보인다.</p>
+              <p>그럼에도 그는 끝까지 인간처럼 행동하려 든다. 마치 스스로가 아직 <span class="inf-glitch-red">"완전히 망가지지 않았다"</span>고 믿고 싶은 것처럼.</p>
+            </div>
+            <table class="stat-table">
+              <tbody>
+                <tr>
+                  <td>근력</td><td>78</td>
+                  <td class="stat-bar-cell"><div class="stat-bar-wrap"><div class="stat-bar-fill" data-w="78"></div></div></td>
+                </tr>
+                <tr>
+                  <td>지능</td><td>67</td>
+                  <td class="stat-bar-cell"><div class="stat-bar-wrap"><div class="stat-bar-fill" data-w="67"></div></div></td>
+                </tr>
+                <tr>
+                  <td>체력</td><td>55</td>
+                  <td class="stat-bar-cell"><div class="stat-bar-wrap"><div class="stat-bar-fill" data-w="55"></div></div></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="skill-entry" style="margin-top:1.5rem;">
+              <div class="skill-name">고유 능력 · [ 잔존 봉합 ]</div>
+              <div class="skill-desc">자신의 살점이나 검은 혈관을 강제로 증식시켜 손상 부위를 억지로 봉합한다. 해당 턴 받는 피해를 없애며, 3턴간 체력이 풀로 채워진다. 또한 근접 공격 성공 시 대상에게 감염 흔적을 남긴다. 감염은 의료와 응급처치 실패시 체력의 상당 부분이 깎이게 된다.</div>
+            </div>
+
+            <!-- 오너란 -->
+            <div style="margin-top:2.5rem; padding-top:1.5rem; border-top:1px solid #2a2520;">
+              <div style="font-family:var(--mono); font-size:0.5rem; letter-spacing:0.4em; color:#5a4030; margin-bottom:0.8rem; text-transform:uppercase;">오너란 · Owner</div>
+              <div style="font-family:var(--mono); font-size:0.75rem; color:#9a8878; line-height:2.4; letter-spacing:0.15em;">
+                오너 닉네임 : 필연<br>
+                오너 나이 : 성인<br>
+                오너 아이디 : @easy_relation
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+</div><!-- /document -->
+
+<script>
+  // 비밀 섹션
+  document.getElementById('classBtn').addEventListener('click', function() {
+    const isOpening = !this.classList.contains('open');
+    this.classList.toggle('open');
+    document.getElementById('classContent').classList.toggle('open');
+
+    // 열릴 때만 글리치
+    if (isOpening) {
+      const overlay = document.getElementById('glitch-overlay');
+      overlay.classList.remove('active');
+      void overlay.offsetWidth; // reflow
+      overlay.classList.add('active');
+    }
+  });
+
+  // 카드 플립
+  document.getElementById('flipCard').addEventListener('click', function() {
+    this.classList.toggle('flipped');
+  });
+
+  // ── 인트로 로딩 ──
+  const lines = [
+    "아아, 네, 네.",
+    "이렇게라도 하지 않으면 살 수가 없었습니다.\n살아남으려면 쓸모가 있어야 했으니까요.",
+    "그대는, 쓸모를 찾고 계십니까?"
+  ];
+  const pauseAfter = [1200, 1800, 2500];
+
+  let lineIdx = 0, charIdx = 0, typing = false, typingTimer = null;
+  const introEl = document.getElementById('intro');
+  const textEl  = document.getElementById('intro-text');
+  const docEl   = document.getElementById('main-document');
+
+  docEl.style.opacity = '0';
+  docEl.style.transition = 'opacity 1s ease';
+  introEl.style.transition = 'opacity 0.8s ease';
+
+  function typeChar() {
+    const line = lines[lineIdx];
+    if (charIdx <= line.length) {
+      textEl.style.opacity = '1';
+      textEl.textContent = line.slice(0, charIdx);
+      charIdx++;
+      typingTimer = setTimeout(typeChar, charIdx === 1 ? 150 : 45 + Math.random() * 40);
+    } else {
+      typing = false;
+      typingTimer = setTimeout(autoNext, pauseAfter[lineIdx] ?? 1500);
+    }
+  }
+
+  function startTyping() {
+    typing = true;
+    charIdx = 0;
+    textEl.classList.remove('glitch-out', 'no-cursor');
+    textEl.style.opacity = '1';
+    typeChar();
+  }
+
+  function endIntro() {
+    introEl.style.opacity = '0';
+    introEl.style.pointerEvents = 'none';
+    docEl.style.opacity = '1';
+    setTimeout(() => { introEl.style.display = 'none'; }, 900);
+  }
+
+  function autoNext() {
+    if (lineIdx === lines.length - 1) {
+      endIntro();
+      return;
+    }
+    // 글리치 클래스 추가 → 400ms 후 클래스 제거 + 텍스트 지우기 + 다음 줄
+    textEl.classList.add('no-cursor', 'glitch-out');
+    setTimeout(() => {
+      textEl.classList.remove('glitch-out', 'no-cursor');
+      textEl.textContent = '';
+      textEl.style.opacity = '1';
+      lineIdx++;
+      startTyping();
+    }, 400);
+  }
+
+  function onSkip() {
+    clearTimeout(typingTimer);
+    if (typing) {
+      textEl.textContent = lines[lineIdx];
+      typing = false;
+      typingTimer = setTimeout(autoNext, 400);
+    } else {
+      autoNext();
+    }
+  }
+
+  introEl.addEventListener('click', onSkip);
+  introEl.addEventListener('touchend', (e) => { e.preventDefault(); onSkip(); });
+
+  startTyping();
+
+  // 폰트 무거워서 막힐 경우 10초 후 강제 종료
+  setTimeout(() => { endIntro(); }, 10000);
+
+  // ── 스탯 바 애니메이션
+  const fills = document.querySelectorAll('.stat-bar-fill');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.width = e.target.dataset.w + '%';
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  fills.forEach(f => observer.observe(f));
+</script>
+</body>
+</html>
