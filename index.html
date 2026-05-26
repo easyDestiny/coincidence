@@ -616,16 +616,24 @@
     width: 100%;
     transition: transform 0.7s ease;
     transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
   }
 
   .flip-card.flipped .flip-card-inner {
     transform: rotateY(180deg);
+    -webkit-transform: rotateY(180deg);
   }
 
   .flip-front, .flip-back {
     width: 100%;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+  }
+
+  .flip-front {
+    background: transparent;
+    overflow: hidden;
   }
 
   .flip-back {
@@ -633,8 +641,10 @@
     top: 0;
     left: 0;
     transform: rotateY(180deg);
-    background: rgba(139,26,26,0.03);
+    -webkit-transform: rotateY(180deg);
+    background: #0d0d0d;
     padding-top: 0.5rem;
+    min-height: 100%;
   }
 
   /* ── 감염체 섹션 (기존 standalone 제거됨) ── */
@@ -808,32 +818,33 @@
   .cg {
     display: inline;
     animation: cgAnim var(--d, 6s) var(--delay, 0s) infinite;
+    will-change: text-shadow, transform;
   }
   @keyframes cgAnim {
-    0%, 88%, 100% { text-shadow: none; opacity: 1; transform: none; }
-    90% { text-shadow: 1px 0 #f00, -1px 0 #0ff; transform: translateX(1px); opacity: 0.8; }
-    92% { text-shadow: -2px 0 #f00, 2px 0 #0ff; transform: translateX(-1px); }
-    94% { text-shadow: 1px 0 #f00, -1px 0 #0ff; opacity: 0.6; }
-    96% { text-shadow: none; opacity: 1; transform: none; }
+    0%, 85%, 100% { text-shadow: none; transform: none; }
+    88% { text-shadow: 2px 0 #f00, -2px 0 #0ff; transform: translateX(1px); }
+    91% { text-shadow: -2px 0 #f00, 2px 0 #0ff; transform: translateX(-1px); }
+    94% { text-shadow: 1px 0 #f00, -1px 0 #0ff; transform: none; }
+    97% { text-shadow: none; transform: none; }
   }
 
   /* ── 8. 감염체 제목 지직 ── */
   .infected-title { animation: infTitleGlitch 3s infinite; font-size: 1.1rem !important; }
   @keyframes infTitleGlitch {
     0%, 80%, 100% { text-shadow: none; transform: none; }
-    82% { text-shadow: 3px 0 #f00, -3px 0 #0ff; transform: translateX(2px); }
-    84% { text-shadow: -3px 0 #f00, 3px 0 #0ff; transform: translateX(-2px); }
-    86% { text-shadow: 2px 0 #f00, -2px 0 #0ff; transform: skewX(3deg); }
+    82% { text-shadow: 3px 0 #f00, -3px 0 #0ff; transform: translateX(1px); }
+    84% { text-shadow: -3px 0 #f00, 3px 0 #0ff; transform: translateX(-1px); }
+    86% { text-shadow: 2px 0 #f00, -2px 0 #0ff; transform: skewX(2deg); }
     88% { text-shadow: none; transform: none; }
   }
 
   /* ── 10. 감염체 본문 글리치 ── */
   .inf-glitch { animation: infGlitch 5s infinite; }
   @keyframes infGlitch {
-    0%, 85%, 100% { text-shadow: none; }
-    87% { text-shadow: 2px 0 rgba(0,0,0,0.5), -2px 0 #0ff; opacity: 0.7; transform: translateX(2px); }
-    89% { text-shadow: -2px 0 rgba(0,0,0,0.5), 2px 0 #0ff; transform: translateX(-1px); }
-    91% { text-shadow: none; opacity: 1; transform: none; }
+    0%, 85%, 100% { text-shadow: none; transform: none; }
+    87% { text-shadow: 2px 0 #000, -2px 0 #0ff; transform: translateX(1px); }
+    89% { text-shadow: -2px 0 #000, 2px 0 #0ff; transform: none; }
+    91% { text-shadow: none; transform: none; }
   }
   .inf-glitch-red {
     color: #8b1a1a;
@@ -841,10 +852,10 @@
     animation: infGlitchRed 4s infinite;
   }
   @keyframes infGlitchRed {
-    0%, 82%, 100% { text-shadow: none; }
-    84% { text-shadow: 2px 0 #f00, -2px 0 #ff6060; transform: translateX(2px); opacity: 0.8; }
-    86% { text-shadow: -3px 0 #f00, 3px 0 #ff0000; transform: translateX(-2px); }
-    90% { text-shadow: none; transform: none; opacity: 1; }
+    0%, 82%, 100% { text-shadow: none; transform: none; }
+    84% { text-shadow: 2px 0 #f00, -2px 0 #ff6060; transform: translateX(1px); }
+    86% { text-shadow: -3px 0 #f00, 3px 0 #ff0000; transform: translateX(-1px); }
+    90% { text-shadow: none; transform: none; }
   }
 
   /* ── 6. 카드 플립 힌트 ── */
@@ -1061,11 +1072,11 @@
     </div>
 
     <div class="clinical-text">
-      <p>본 환자는 멸망 이후의 세계 속에서도 끝내 <span class="inline-em">타인의 숨을 붙들어 <span class="cg" style="--d:7s;--delay:0.3s">매며</span></span> 살아간다. 끊어진 살갗을 <span class="cg" style="--d:5s;--delay:1.2s">기우고</span>, 무너진 육신을 억지로 봉합하면서도 정작 자신이 왜 살아 있는지에 대해서는 오래도록 답하지 못한 채 살아가는 것으로 관찰된다.</p>
+      <p>본 환자는 멸망 이후의 세계 속에서도 끝내 <span class="inline-em">타인의 숨을 붙들어 <span class="cg" style="--d:7s;--delay:0.2s">매며</span></span> 살아간다. 끊어진 살갗을 <span class="cg" style="--d:6s;--delay:4.6s">기우고</span>, 무너진 육신을 억지로 봉합하면서도 정작 자신이 왜 살아 있는지에 대해서는 오래도록 답하지 못한 채 살아가는 것으로 관찰된다.</p>
 
-      <p>손끝은 늘 <span class="cg" style="--d:8s;--delay:0.7s">다정하나</span>, 그 다정함에는 목적을 잃은 집착과도 같은 기색이 묻어난다. 타인의 생존 위에 자신의 존재 이유를 <span class="cg" style="--d:6s;--delay:2s">덧쌓는</span> 패턴이 반복적으로 확인됨. 이미 끝났어야 했을 생명조차 조용히 주워 담아 이어 붙이려 하며, 이것이 <span class="cg" style="--d:9s;--delay:0.5s">구원</span>인지 자기만족인지 환자 본인도 명확히 인식하지 못하는 상태로 판단된다.</p>
+      <p>손끝은 늘 <span class="cg" style="--d:6s;--delay:1.4s">다정하나</span>, 그 다정함에는 목적을 잃은 집착과도 같은 기색이 묻어난다. 타인의 생존 위에 자신의 존재 이유를 <span class="cg" style="--d:9s;--delay:2.1s">덧쌓는</span> 패턴이 반복적으로 확인됨. 이미 끝났어야 했을 생명조차 조용히 주워 담아 이어 붙이려 하며, 이것이 <span class="cg" style="--d:7s;--delay:2.7s">구원</span>인지 자기만족인지 환자 본인도 명확히 인식하지 못하는 상태로 판단된다.</p>
 
-      <p>감정 표출 빈도 <span class="cg" style="--d:5s;--delay:1.8s">낮음</span>. 담담한 표정이 주를 이루며 비극적 상황 앞에서도 과장된 반응 없음. 그러나 <span class="inline-em">사람을 <span class="cg" style="--d:7s;--delay:3s">포기</span>하는 행위에는 극도의 저항</span>을 보임.</p>
+      <p>감정 표출 빈도 <span class="cg" style="--d:10s;--delay:3.3s">낮음</span>. 담담한 표정이 주를 이루며 비극적 상황 앞에서도 과장된 반응 없음. 그러나 <span class="inline-em">사람을 <span class="cg" style="--d:8s;--delay:4.0s">포기</span>하는 행위에는 극도의 저항</span>을 보임.</p>
     </div>
 
     <div class="obs-box" style="margin-top:1.5rem;">
@@ -1076,8 +1087,8 @@
     </div>
 
     <div class="clinical-text" style="margin-top:1.2rem;">
-      <p>가끔 의미를 지나치게 오래 <span class="cg" style="--d:8s;--delay:0.9s">생각하는</span> 경향 확인됨. 「인간은 왜 살아야 하는가」 「존재는 증명되어야 하는가」 「살아남았다는 사실과 살아 있다는 사실은 동일한가」 등. 그러나 이를 외부에 설명하지 않으려는 <span class="cg" style="--d:6s;--delay:2.5s">태도</span>가 강함. <span class="inline-em">설명되는 순간 감정은 이미 다른 것이 된다</span>고 진술함.</p>
-      <p>그는 이유 없이 살아갈 수 있는 인간을 <span class="cg" style="--d:7s;--delay:1.5s">이해하지</span> 못한다. 그것이 동경인지 두려움인지는 본인도 <span class="cg" style="--d:9s;--delay:0.2s">판별하지</span> 못한 채임.</p>
+      <p>가끔 의미를 지나치게 오래 <span class="cg" style="--d:8s;--delay:0.9s">생각하는</span> 경향 확인됨. 「인간은 왜 살아야 하는가」 「존재는 증명되어야 하는가」 「살아남았다는 사실과 살아 있다는 사실은 동일한가」 등. 그러나 이를 외부에 설명하지 않으려는 <span class="cg" style="--d:9s;--delay:5.2s">태도</span>가 강함. <span class="inline-em">설명되는 순간 감정은 이미 다른 것이 된다</span>고 진술함.</p>
+      <p>그는 이유 없이 살아갈 수 있는 인간을 <span class="cg" style="--d:7s;--delay:0.6s">이해하지</span> 못한다. 그것이 동경인지 두려움인지는 본인도 <span class="cg" style="--d:8s;--delay:1.8s">판별하지</span> 못한 채임.</p>
     </div>
   </div>
 
@@ -1147,18 +1158,18 @@
             <div style="font-size:1.1rem;font-weight:700;letter-spacing:0.2em;margin-bottom:1.5rem;color:var(--ink-dim);">비밀 설정 · Classified Background</div>
             <div class="clinical-text">
               <p>본명: <span class="inline-em">지우연(智虞延)</span>. 지워지지 못하였으며, 끝내 <span class="secret-bold">지워지기를 거부한 채 잔존해 왔다</span>는 사실만이 어쩌면 그를 가장 온전히 설명하는 문장일 것이다.</p>
-              <p>그는 <span class="secret-bold">우연(偶然)히 태어난 인간</span>이었으므로 애초부터 살아야 할 거창한 연유가 존재하지 않았다. 지우연은 멸망 이후의 세계에서 사람들 사이 어딘가에 끼어 그 <span class="cg" style="--d:8s;--delay:1s">우연성</span>을 악착같이 증명하던 이었다. 그러나 그 <span class="cg" style="--d:6s;--delay:2s">'끼어 있음'</span>이 실존을 의미하는가에 대해서는, 그 자신조차 오래 의문을 품고 있었다.</p>
-              <p>전환점: <span class="secret-bold">이도가 건네준 초콜릿</span>. 달다는 감각은 이상할 만큼 사랑에 빠지게 하는 종류의 것이었다. 혀 위에서 <span class="cg" style="--d:7s;--delay:0.5s">녹아내리는</span> 당분은 굶주림만이 아니라 오래전에 마모된 감각들까지 억지로 끌어올렸다. 체온, 유년, 보호받던 기억의 잔향.</p>
-              <p>지나치게 달콤한 것은 때때로 구원보다 잔혹하다. 이미 폐허가 되어버린 인간에게 다시금 <span class="cg" style="--d:9s;--delay:1.5s">결핍</span>을 자각하게 만들기 때문이다. 한 입 크기의 사소한 당류가 인간을 삶에 <span class="cg" style="--d:5s;--delay:3s">유착</span>시킬 수도 있다는 사실을 그는 그날 처음 이해하였다.</p>
-              <p>이도는 이유를 요구하지 않았다. 쓸모를 입증하지 않아도 먹을 것을 나누었고, 살아 있음 자체를 문제 삼지 않았다. 지우연은 그것을 끝내 <span class="cg" style="--d:7s;--delay:0.8s">이해하지</span> 못했다. 이해할 수 없다는 감정이 동경인지 공포인지조차 끝내 판별하지 못하였다.</p>
-              <p>그래, 그 역시 알고 있었을 것이다. 자신은 <span class="secret-bold">영원히 프로메테우스가 될 수 없다</span>는 사실을. 신성을 흉내 내는 법만 익혔을 뿐, 신의 위치에 도달한 적은 단 한 번도 없었다. 그럼에도 그는 <span class="cg" style="--d:6s;--delay:2.2s">매일</span> 같은 바위 앞에 선다. 이도의 얼굴은 끝내 언어화되지 못한 문장들 틈에서 <span class="cg" style="--d:8s;--delay:1.1s">유령처럼</span> 부유하고 있었다.</p>
+              <p>그는 <span class="secret-bold">우연(偶然)히 태어난 인간</span>이었으므로 애초부터 살아야 할 거창한 연유가 존재하지 않았다. 지우연은 멸망 이후의 세계에서 사람들 사이 어딘가에 끼어 그 <span class="cg" style="--d:6s;--delay:3.8s">우연성</span>을 악착같이 증명하던 이었다. 그러나 그 <span class="cg" style="--d:10s;--delay:2.4s">'끼어 있음'</span>이 실존을 의미하는가에 대해서는, 그 자신조차 오래 의문을 품고 있었다.</p>
+              <p>전환점: <span class="secret-bold">이도가 건네준 초콜릿</span>. 달다는 감각은 이상할 만큼 사랑에 빠지게 하는 종류의 것이었다. 혀 위에서 <span class="cg" style="--d:7s;--delay:5.7s">녹아내리는</span> 당분은 굶주림만이 아니라 오래전에 마모된 감각들까지 억지로 끌어올렸다. 체온, 유년, 보호받던 기억의 잔향.</p>
+              <p>지나치게 달콤한 것은 때때로 구원보다 잔혹하다. 이미 폐허가 되어버린 인간에게 다시금 <span class="cg" style="--d:9s;--delay:1.1s">결핍</span>을 자각하게 만들기 때문이다. 한 입 크기의 사소한 당류가 인간을 삶에 <span class="cg" style="--d:8s;--delay:3.5s">유착</span>시킬 수도 있다는 사실을 그는 그날 처음 이해하였다.</p>
+              <p>이도는 이유를 요구하지 않았다. 쓸모를 입증하지 않아도 먹을 것을 나누었고, 살아 있음 자체를 문제 삼지 않았다. 지우연은 그것을 끝내 <span class="cg" style="--d:7s;--delay:0.2s">이해하지</span> 못했다. 이해할 수 없다는 감정이 동경인지 공포인지조차 끝내 판별하지 못하였다.</p>
+              <p>그래, 그 역시 알고 있었을 것이다. 자신은 <span class="secret-bold">영원히 프로메테우스가 될 수 없다</span>는 사실을. 신성을 흉내 내는 법만 익혔을 뿐, 신의 위치에 도달한 적은 단 한 번도 없었다. 그럼에도 그는 <span class="cg" style="--d:8s;--delay:0.9s">매일</span> 같은 바위 앞에 선다. 이도의 얼굴은 끝내 언어화되지 못한 문장들 틈에서 <span class="cg" style="--d:6s;--delay:1.4s">유령처럼</span> 부유하고 있었다.</p>
             </div>
             <hr class="relation-divider">
             <div style="font-size:0.9rem;font-weight:700;letter-spacing:0.3em;margin-bottom:1.2rem;color:var(--ink-dim);">비밀 선관 · Secret Relation — 이도(李道)</div>
             <div class="clinical-text">
-              <p>그는 이도를 이해하지 못한다. 아니, 평생이 가도 <span class="cg" style="--d:7s;--delay:0.3s">이해할 수 없을</span> 것이다. 이해할 수 없었기에 언제나, 오래도록 바라보게 되었다. 이도는 언제나 자신이 묻는 것에 대한 이유를 묻지 않았고, 존재를 계산하며 치열하게 살지 않았다. 마치 살아 있다는 사실만으로 이미 충분하다는 듯 사람을 받아들였다. 그저 쿠키를 만들고, <span class="cg" style="--d:5s;--delay:1.7s">초콜릿을 녹이며</span>. 지우연은 그 태도를 끝내 납득하지 못했다.</p>
+              <p>그는 이도를 이해하지 못한다. 아니, 평생이 가도 <span class="cg" style="--d:9s;--delay:2.1s">이해할 수 없을</span> 것이다. 이해할 수 없었기에 언제나, 오래도록 바라보게 되었다. 이도는 언제나 자신이 묻는 것에 대한 이유를 묻지 않았고, 존재를 계산하며 치열하게 살지 않았다. 마치 살아 있다는 사실만으로 이미 충분하다는 듯 사람을 받아들였다. 그저 쿠키를 만들고, <span class="cg" style="--d:7s;--delay:2.7s">초콜릿을 녹이며</span>. 지우연은 그 태도를 끝내 납득하지 못했다.</p>
               <p>그렇기에 지우연은 이도를 동경한다. 그러나 단 한 번도 닮고 싶다고 입 밖에 낸 적 없다. 그런 문장을 말하게 된다면 자신이 결코 그와 같은 인간이 될 수 없음을 인정하게 될 것 같았으므로.</p>
-              <p>이도는 이유 없이 살아가는 인간이었다. 반면 지우연은 살아가기 위해 끊임없이 이유를 제조해야만 하는 인간이었다. 다만 아주 드물게 — 봉합을 끝낸 뒤 손끝에 남은 피 냄새 사이에서 그는 떠올린다. 그날 혀끝에 남았던 <span class="cg" style="--d:6s;--delay:2.8s">초콜릿의 단맛</span>을. 그리고 자신이 아직도 그 순간으로부터 <span class="cg" style="--d:8s;--delay:0.6s">완전히 벗어나지 못했다</span>는 사실을.</p>
+              <p>이도는 이유 없이 살아가는 인간이었다. 반면 지우연은 살아가기 위해 끊임없이 이유를 제조해야만 하는 인간이었다. 다만 아주 드물게 — 봉합을 끝낸 뒤 손끝에 남은 피 냄새 사이에서 그는 떠올린다. 그날 혀끝에 남았던 <span class="cg" style="--d:10s;--delay:3.3s">초콜릿의 단맛</span>을. 그리고 자신이 아직도 그 순간으로부터 <span class="cg" style="--d:8s;--delay:4.0s">완전히 벗어나지 못했다</span>는 사실을.</p>
             </div>
           </div>
 
